@@ -106,14 +106,18 @@ Em caso de dúvidas ou problemas, entre em contato com o suporte técnico.
 
 Este sistema está organizado em duas partes:
 
-1. **Frontend**: Aplicação React com Vite
-2. **Backend**: API Node.js com Express
+1. **Frontend**: Aplicação React com Vite (sistema.hubsa2.com.br)
+2. **Backend**: API Node.js com Express (api.hubsa2.com.br)
 
 ## Instruções de Implantação na VPS
 
 ### Configuração Inicial
 
-1. Conecte-se à sua VPS via SSH
+1. Conecte-se à sua VPS via SSH:
+   ```
+   ssh root@168.231.92.234
+   ```
+
 2. Clone o repositório: `git clone <URL_DO_REPOSITORIO>`
 3. Entre na pasta do projeto: `cd sistemahubsa2`
 
@@ -157,9 +161,9 @@ Este sistema está organizado em duas partes:
    npm install
    ```
 
-3. Configure a URL do backend no arquivo `.env`:
+3. Configure a URL do backend no arquivo `.env.production`:
    ```
-   echo "VITE_API_URL=http://seu-endereco-ou-ip:3000" > .env
+   echo "VITE_API_URL=http://api.hubsa2.com.br" > .env.production
    ```
 
 4. Construa o projeto:
@@ -196,6 +200,34 @@ Este sistema está organizado em duas partes:
    ```
    sudo systemctl restart nginx
    ```
+
+6. Configure o SSL:
+   ```
+   sudo apt install certbot python3-certbot-nginx
+   sudo certbot --nginx -d sistema.hubsa2.com.br -d api.hubsa2.com.br
+   ```
+
+### Configuração de DNS
+
+Para que o sistema funcione corretamente, configure os seguintes registros DNS:
+
+1. Registro A para sistema.hubsa2.com.br apontando para 168.231.92.234
+2. Registro A para api.hubsa2.com.br apontando para 168.231.92.234
+
+## Implantação Automatizada
+
+Para facilitar a implantação, use o script `deploy.sh`:
+
+```bash
+chmod +x deploy.sh
+sudo ./deploy.sh
+```
+
+Este script automatiza todo o processo de implantação, incluindo:
+- Instalação de dependências
+- Compilação do frontend e backend
+- Configuração do Nginx
+- Configuração do SSL
 
 ## Manutenção
 

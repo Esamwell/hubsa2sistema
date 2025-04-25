@@ -10,9 +10,9 @@ import { ensureDataDir } from './services/fileService';
 const app = express();
 
 // Configuração do CORS
-const FRONTEND_URL = process.env.APP_URL || 'http://localhost:5173';
+const FRONTEND_URL = process.env.APP_URL || 'http://sistema.hubsa2.com.br';
 app.use(cors({
-  origin: [FRONTEND_URL],
+  origin: [FRONTEND_URL, 'https://sistema.hubsa2.com.br'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma'],
   credentials: true,
