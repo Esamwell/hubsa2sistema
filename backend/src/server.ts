@@ -6,6 +6,11 @@ import requestRoutes from './routes/requestRoutes';
 import userRoutes from './routes/userRoutes';
 import { ensureDataDir } from './services/fileService';
 
+// Interface para o objeto de senhas
+interface PasswordStore {
+  [key: string]: string;
+}
+
 // Inicializa o app Express
 const app = express();
 
@@ -58,11 +63,11 @@ app.post('/api/update-password', async (req, res) => {
     const passwordFile = join(process.cwd(), 'data', 'passwords.json');
     console.log(`Arquivo de senhas: ${passwordFile}`);
     
-    let passwords = {};
+    let passwords: PasswordStore = {};
     
     try {
       const data = await fs.readFile(passwordFile, 'utf8');
-      passwords = JSON.parse(data);
+      passwords = JSON.parse(data) as PasswordStore;
       console.log('Senhas armazenadas no arquivo:', passwords);
     } catch (error) {
       console.log('ERRO: Não foi possível ler o arquivo de senhas:', error);
@@ -136,11 +141,11 @@ app.post('/api/force-password', async (req, res) => {
     const passwordFile = join(process.cwd(), 'data', 'passwords.json');
     console.log(`Arquivo de senhas: ${passwordFile}`);
     
-    let passwords = {};
+    let passwords: PasswordStore = {};
     
     try {
       const data = await fs.readFile(passwordFile, 'utf8');
-      passwords = JSON.parse(data);
+      passwords = JSON.parse(data) as PasswordStore;
       console.log('Senhas armazenadas no arquivo:', passwords);
     } catch (error) {
       console.log('Erro ao ler senhas, criando novo arquivo');
