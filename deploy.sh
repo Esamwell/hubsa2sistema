@@ -1,32 +1,60 @@
 #!/bin/bash
 
-# Configurações
-IP="168.231.92.234"
-USER="root"
-APP_DIR="/var/www/sistemahubsa2"
-API_DIR="/var/www/sistemahubsa2-api"
+echo "=== Iniciando implantação do Sistema HubSA ==="
 
-echo "Iniciando processo de deploy..."
+# Configuração de cores para o terminal
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
-# 1. Build do frontend
-echo "Construindo frontend..."
+# Verificar permissões
+if [ "$(id -u)" != "0" ]; then
+   echo -e "${RED}Este script deve ser executado como root${NC}" 
+   exit 1
+fi
+
+echo -e "${YELLOW}Atualizando o sistema...${NC}"
+apt update && apt upgrade -y
+
+echo -e "${YELLOW}Instalando dependências...${NC}"
+apt install -y nginx nodejs npm
+
+# Instalando PM2 globalmente
+echo -e "${YELLOW}Instalando PM2...${NC}"
+npm install -g pm2
+
+# Backend
+echo -e "${YELLOW}Configurando o backend...${NC}"
+cd backend
+npm install
 npm run build
 
-# 2. Copiar arquivos para a VPS
-echo "Copiando arquivos para a VPS..."
-scp -r dist/* $USER@$IP:$APP_DIR/
+# Iniciando o backend com PM2
+echo -e "${YELLOW}Iniciando o backend...${NC}"
+pm2 start dist/index.js --name hubsa-backend
+pm2 save
 
-# 3. Copiar arquivos da API
-echo "Copiando arquivos da API..."
-scp -r src/api/* $USER@$IP:$API_DIR/
-scp package.json $USER@$IP:$API_DIR/
+# Frontend
+echo -e "${YELLOW}Configurando o frontend...${NC}"
+cd ../frontend
+npm install
+npm run build
 
-# 4. Instalar dependências e reiniciar a API
-echo "Instalando dependências e reiniciando a API..."
-ssh $USER@$IP "cd $API_DIR && npm install && pm2 restart sistemahubsa2-api"
+# Configurando o Nginx
+echo -e "${YELLOW}Configurando o Nginx...${NC}"
+mkdir -p /var/www/sistemahubsa2
+cp -r dist /var/www/sistemahubsa2/frontend
+cp ../nginx.conf /etc/nginx/sites-available/hubsa
 
-# 5. Reiniciar Nginx
-echo "Reiniciando Nginx..."
-ssh $USER@$IP "systemctl restart nginx"
+# Criando link simbólico
+ln -sf /etc/nginx/sites-available/hubsa /etc/nginx/sites-enabled/
 
-echo "Deploy concluído com sucesso!" 
+# Verificando configuração do Nginx
+nginx -t
+
+# Reiniciando o Nginx
+systemctl restart nginx
+
+echo -e "${GREEN}Implantação concluída com sucesso!${NC}"
+echo -e "Sistema disponível em: http://$(hostname -I | awk '{print $1}')" 

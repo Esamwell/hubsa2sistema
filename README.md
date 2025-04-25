@@ -101,3 +101,137 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 📞 Suporte
 
 Em caso de dúvidas ou problemas, entre em contato com o suporte técnico.
+
+## Estrutura do Projeto
+
+Este sistema está organizado em duas partes:
+
+1. **Frontend**: Aplicação React com Vite
+2. **Backend**: API Node.js com Express
+
+## Instruções de Implantação na VPS
+
+### Configuração Inicial
+
+1. Conecte-se à sua VPS via SSH
+2. Clone o repositório: `git clone <URL_DO_REPOSITORIO>`
+3. Entre na pasta do projeto: `cd sistemahubsa2`
+
+### Backend
+
+1. Entre na pasta do backend:
+   ```
+   cd backend
+   ```
+
+2. Instale as dependências:
+   ```
+   npm install
+   ```
+
+3. Construa o projeto:
+   ```
+   npm run build
+   ```
+
+4. Para iniciar o servidor em produção:
+   ```
+   npm start
+   ```
+
+5. Para manter o servidor rodando em segundo plano, recomenda-se usar PM2:
+   ```
+   npm install -g pm2
+   pm2 start dist/index.js --name hubsa-backend
+   ```
+
+### Frontend
+
+1. Entre na pasta do frontend:
+   ```
+   cd frontend
+   ```
+
+2. Instale as dependências:
+   ```
+   npm install
+   ```
+
+3. Configure a URL do backend no arquivo `.env`:
+   ```
+   echo "VITE_API_URL=http://seu-endereco-ou-ip:3000" > .env
+   ```
+
+4. Construa o projeto:
+   ```
+   npm run build
+   ```
+
+5. O projeto compilado estará na pasta `dist` e pode ser servido com Nginx ou outro servidor web.
+
+### Configuração do Nginx
+
+1. Instale o Nginx (se ainda não estiver instalado):
+   ```
+   sudo apt update
+   sudo apt install nginx
+   ```
+
+2. Copie o arquivo de configuração:
+   ```
+   sudo cp nginx.conf /etc/nginx/sites-available/hubsa
+   ```
+
+3. Crie um link simbólico:
+   ```
+   sudo ln -s /etc/nginx/sites-available/hubsa /etc/nginx/sites-enabled/
+   ```
+
+4. Verifique a configuração:
+   ```
+   sudo nginx -t
+   ```
+
+5. Reinicie o Nginx:
+   ```
+   sudo systemctl restart nginx
+   ```
+
+## Manutenção
+
+### Backup dos Dados
+
+Os dados são armazenados em arquivos JSON na pasta `backend/data`. Faça backup regularmente:
+
+```
+cp -r backend/data /caminho/do/backup/data_$(date +%Y%m%d)
+```
+
+### Atualização do Sistema
+
+1. Pare os serviços:
+   ```
+   pm2 stop hubsa-backend
+   ```
+
+2. Atualize o código:
+   ```
+   git pull
+   ```
+
+3. Reconstrua e reinicie:
+   ```
+   cd backend
+   npm install
+   npm run build
+   pm2 restart hubsa-backend
+
+   cd ../frontend
+   npm install
+   npm run build
+   ```
+
+4. Reinicie o Nginx:
+   ```
+   sudo systemctl restart nginx
+   ```
